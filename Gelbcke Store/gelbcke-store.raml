@@ -1,0 +1,185 @@
+#%RAML 1.0
+title: Gelbcke Store
+
+# You've been hired to develop an E-commerce of a clothing store, you'll be responsible to the process of creating the system that will manage the registered shirts. Your mission is to create 5 services:
+# - List shirts.
+# - List shirt by ID.
+# - Create shirt.
+# - Alter shirts.
+# - Delete shirts.
+
+# The information necessary to a product are: 
+# - ID.
+# - Size.
+# - Color.
+# - If is printed/stamped.
+# - If is long sleeve, short sleeve or tank top.
+
+types:
+  Shirt: !include /data-type/ShirtDataType.raml
+
+traits:
+  client-id-required:
+    headers:
+      client_id:
+        required: true
+        type: string
+      client_secret:
+        required: true
+        type: string
+
+/shirts:
+  get:
+    description: Retrieve all shirts available in the database.
+    queryParameters:
+      color: 
+        required: false
+        displayName: Color
+        enum:
+          - Black
+          - Blue
+          - Brown
+          - Green
+          - Grey
+          - Orange
+          - Pink
+          - Purple
+          - Red
+          - White
+          - Yellow
+      size:
+        required: false
+        displayName: Size
+        enum:
+          - PP
+          - P
+          - M
+          - G
+          - GG
+          - XG
+      printed:
+        required: false
+        displayName: Printed/Stamp
+        type: boolean
+        enum:
+          - True
+          - False
+      sleeve:
+        required: false
+        displayName: Sleeve Model
+        enum:
+          - Short
+          - Long
+          - Tank Top
+    responses:
+      200:
+        body:
+          application/json:
+            type: Shirt[]
+            examples:
+              output: !include data-type/ShirtsExample.raml
+
+  post:
+    description: Creation of a new shirt in the database.
+    is: [client-id-required]
+    body:
+      application/json:
+        type: Shirt
+        examples:
+          input: !include /examples/ShirtNoIDExample.raml
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: Shirt created with success!
+              ID: 27
+      401:
+        body:
+          application/json:
+            example:
+              message: Authorization level required
+      405:
+        body:
+          application/json:
+            example:
+              message: Method not allowed
+
+  /{ID}:
+    get:
+      description: Retrieve an especific shirt in the database (if ID matches).
+      responses:
+        200:
+          body:
+            application/json:
+              type: Shirt
+              examples:
+                output: !include examples/ShirtExample.raml
+        404:
+          body:
+            application/json:
+              example:
+                message: Shirt not found
+                httpStatus: 404
+
+    put:
+      description: Updates an already existing shirt in the database.
+      is: [client-id-required]
+      body:
+        application/json:
+          type: Shirt
+          examples:
+            input: !include /examples/ShirtNoIDExample.raml
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Shirt updated with success!
+                ID: 17
+                size: "G"
+                color: "Grey"
+                printed: false
+                sleeve: "Long"
+        404:
+          body:
+            application/json:
+              example:
+                message: Shirt not found
+                httpStatus: 404
+        405:
+          body:
+            application/json:
+              example:
+                message: Method not allowed
+
+    delete:
+      description: Deletes an already existing shirt in the database.
+      is: [client-id-required]
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Shirt deleted with success!
+        401:
+          body:
+            application/json:
+              example:
+                message: Authorization level required
+        404:
+          body:
+            application/json:
+              example:
+                message: Shirt not found
+                httpStatus: 404
+        405:
+          body:
+            application/json:
+              example:
+                message: Method not allowed
+
+
+
+
+

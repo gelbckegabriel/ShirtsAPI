@@ -1,0 +1,36 @@
+#%RAML 1.0 DataType
+
+type: object
+properties:
+  ID?: integer
+  size: 
+    enum:
+      - PP
+      - P
+      - M
+      - G
+      - GG
+      - XG
+  color: 
+    enum:
+      - Black
+      - Blue
+      - Brown
+      - Green
+      - Grey
+      - Orange
+      - Pink
+      - Purple
+      - Red
+      - White
+      - Yellow
+  printed: 
+    type: boolean
+    enum:
+      - True
+      - False
+  sleeve: 
+    enum:
+      - Short
+      - Long
+      - Tank Top
