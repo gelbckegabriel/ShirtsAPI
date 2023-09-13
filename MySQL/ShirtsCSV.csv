@@ -1,0 +1,41 @@
+ID,size,color,printed,sleeve
+1,PP,Grey,0,Long
+2,PP,Blue,1,Short
+3,PP,Black,1,"Tank Top"
+4,P,Black,1,"Tank Top"
+5,G,Black,1,"Tank Top"
+6,G,Pink,1,"Tank Top"
+7,G,Pink,1,Short
+8,G,Pink,0,Short
+9,GG,Purple,0,Short
+10,GG,Purple,0,Long
+11,GG,Purple,1,Long
+12,PP,Purple,1,Long
+13,M,Purple,1,Long
+14,M,Green,1,Long
+15,M,Green,0,Long
+16,M,Green,0,Short
+17,GG,Green,0,Short
+18,GG,Green,0,Long
+19,GG,Brown,0,Long
+20,GG,Brown,1,Long
+21,GG,Brown,1,short
+22,G,Brown,1,short
+23,G,Brown,0,short
+24,PP,Brown,0,short
+25,P,Brown,0,short
+26,P,Brown,0,"Tank Top"
+27,M,Brown,0,"Tank Top"
+28,M,Brown,1,"Tank Top"
+29,G,Brown,1,"Tank Top"
+30,M,Orange,1,"Tank Top"
+31,M,Orange,1,Short
+32,M,Red,0,Short
+33,M,Red,1,Long
+34,P,Red,1,Long
+35,G,Red,0,Long
+36,G,Yellow,0,Long
+37,M,Yellow,1,Long
+38,PP,Yellow,1,Long
+39,PP,Yellow,1,"Tank Top"
+40,M,Purple,1,Short
