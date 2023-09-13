@@ -1,0 +1,11 @@
+%dw 2.0
+
+type auto_316610e4_d8cf_4d22_8476_4f008d544c26_Output_Payload = {
+  printed: "false" | "true", 
+  size: "PP" | "P" | "GG" | "G" | "M" | "XG", 
+  color: "Red" | "Brown" | "Pink" | "White" | "Blue" | "Purple" | "Yellow" | "Black" | "Orange" | "Green" | "Grey", 
+  sleeve: "Long" | "Tank Top" | "Short", 
+  ID?: Number, 
+  _?: Any
+}
+

@@ -1,0 +1,10 @@
+%dw 2.0
+
+type auto_e0a3bf11_5882_4dcb_a0fd_0b79c61e57a0_Input_Payload = {|
+  ID: Number, 
+  size: String, 
+  color: String, 
+  printed: Boolean, 
+  sleeve: String
+|}
+

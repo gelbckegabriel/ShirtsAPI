@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="fetchShirt" doc:id="e0a3bf11-5882-4dcb-a0fd-0b79c61e57a0">
+		<db:select doc:name="getShirtByID" doc:id="2f684775-7098-4cfb-8b10-803fcceaef43" config-ref="MySQLConnect">
+			<db:sql><![CDATA[SELECT *
+FROM shirts
+WHERE ID = :ID]]></db:sql>
+			<db:input-parameters><![CDATA[#[{'ID': attributes.uriParams.ID}]]]></db:input-parameters>
+		</db:select>
+		<validation:is-not-empty-collection doc:name="noShirtFound" doc:id="2d28ad36-abcf-468f-8815-7af84eba8f9b" message='#["Shirt not found!"]' />
+		<error-handler>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d751922a-eba1-4344-9fec-5bad042567f9" type="VALIDATION:EMPTY_COLLECTION">
+				<set-variable value="404" doc:name="httpStatus" doc:id="34287e12-2c55-4a60-ae22-4b7cd9e03592" variableName="httpStatus" />
+				<ee:transform doc:name="notFoundMessage" doc:id="16620f44-2a7a-4f22-a5cd-9ef06a400ecc">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "Shirt not found",
+	httpStatus: vars.httpStatus as Number
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="getShirts" doc:id="c5dbfb5f-2921-4155-b1d8-54ec585ab26e" >
+		<choice doc:name="Choice" doc:id="1d71ea03-d0f2-408b-bdbe-4ced90f10635" >
+			<when expression="attributes.queryParams.size != null and not isBlank(attributes.queryParams.size)">
+				<db:select doc:name="getShirtsBySize" doc:id="367a08ca-ddf5-45e9-99fb-31b01faae63f" config-ref="MySQLConnect">
+					<db:sql ><![CDATA[SELECT *
+FROM shirts
+WHERE size = :size]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{'size': attributes.queryParams.size}]]]></db:input-parameters>
+				</db:select>
+				<set-payload value="#[payload]" doc:name="Set Payload" doc:id="f4d171b1-1774-4252-aef3-cb3fb047c97f" />
+			</when>
+			<otherwise >
+				<db:select doc:name="getAllShirts" doc:id="91ad354c-8333-49fe-9844-9ef226276055" config-ref="MySQLConnect">
+					<db:sql ><![CDATA[SELECT *
+FROM shirts]]></db:sql>
+				</db:select>
+				<set-payload value="#[payload]" doc:name="Set Payload" doc:id="cf9b50ff-201e-4d7b-b424-fc131a584754" />
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="shirtsMessage" doc:id="9daf3441-d420-4f63-9c69-f4e2ef3757a6">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	ID: payload01.ID,
+	size: payload01.size default "",
+	color: payload01.color default "",
+	printed: payload01.printed as String,
+	sleeve: payload01.sleeve default ""
+
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+	</flow>
+	<flow name="insertShirt" doc:id="4d30c537-57ff-40c6-960a-29ee82ece34f">
+		<set-variable value="#[payload]" doc:name="shirtInfo" doc:id="6ba33c03-4b0b-40f1-ab65-15833209bdbd" variableName="shirtInfo" />
+		<db:insert doc:name="insertShirt" doc:id="8d99e916-95b3-4896-8166-ea7e3379800b" config-ref="MySQLConnect">
+			<db:sql><![CDATA[INSERT INTO shirts(`size`, `color`, `printed`, `sleeve`) 
+VALUES (:size, :color, :printed, :sleeve)]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'size': vars.shirtInfo.size,
+	'color': vars.shirtInfo.color,
+	'printed': vars.shirtInfo.printed,
+	'sleeve': vars.shirtInfo.sleeve
+}]]]></db:input-parameters>
+		</db:insert>
+		<db:select doc:name="Select" doc:id="8baffad7-0671-4461-86b6-7819ffe8ca1f" config-ref="MySQLConnect">
+			<db:sql><![CDATA[SELECT *
+FROM shirts
+ORDER BY ID desc
+LIMIT 1]]></db:sql>
+		</db:select>
+		<set-variable value="#[payload]" doc:name="shirtInfo" doc:id="3c72a84e-6eea-401e-bdaf-a219559c4bd6" variableName="shirtInfo" />
+		<ee:transform doc:name="createdMessage" doc:id="e0763ebe-2dc9-47ae-b663-eb383428e911">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Shirt created with success!",
+  ID: payload.ID[0]
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getShirtByID" doc:id="316610e4-d8cf-4d22-8476-4f008d544c26">
+		<flow-ref doc:name="fetchShirt" doc:id="1fdf6a70-f34f-4a06-b369-24a095fe441f" name="fetchShirt" />
+		<ee:transform doc:name="shirtMessage" doc:id="8b74dd89-8946-44de-aed5-b91918c0321a">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	ID: payload.ID[0],
+	size: payload.size[0] default "",
+	color: payload.color[0] default "",
+	printed: payload.printed[0] as String,
+	sleeve: payload.sleeve[0] default ""	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="updateShirtByID" doc:id="b88b0455-2644-4f0e-a59b-a53755373100" >
+		<set-variable value="#[attributes.uriParams.ID as Number]" doc:name="ID" doc:id="f0312d34-362e-4db3-8425-163a8d46884e" variableName="ID" />
+		<set-variable value="#[payload]" doc:name="shirtInfo" doc:id="027eeaa6-6825-4020-9345-773d5bf1bd19" variableName="shirtInfo" />
+		<flow-ref doc:name="fetchShirt" doc:id="78a69e0c-2f66-4eb2-b7a1-7050ff74cf31" name="fetchShirt" />
+		<db:update doc:name="updateShirt" doc:id="42b6d812-1bf3-4c69-9532-18782073f083" config-ref="MySQLConnect" >
+			<db:sql ><![CDATA[UPDATE shirts 
+SET size = :size, color = :color, printed = :printed, sleeve = :sleeve
+WHERE ID = :ID]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	'ID': vars.ID,
+	'size': vars.shirtInfo.size,
+	'color': vars.shirtInfo.color,
+	'printed': vars.shirtInfo.printed,
+	'sleeve': vars.shirtInfo.sleeve
+}]]]></db:input-parameters>
+		</db:update>
+		<db:select doc:name="getShirtByID" doc:id="f5f0bca3-eaa9-4cfd-b97f-77e8cab9466a" config-ref="MySQLConnect" >
+			<db:sql ><![CDATA[SELECT *
+FROM shirts
+WHERE ID = :ID]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{'ID': vars.ID}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="shirtMessage" doc:id="866acb39-2762-46c1-b3f1-d8045068cd85" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: 'Shirt updated with success!',
+	ID: payload.ID[0],
+	size: payload.size[0] default "",
+	color: payload.color[0] default "",
+	printed: payload.printed[0],
+	sleeve: payload.sleeve[0] default ""
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="deleteShirtByID" doc:id="ae2bb1ef-4b8f-4213-8e31-061685069fb5" >
+		<set-variable value="#[attributes.uriParams.ID as Number]" doc:name="ID" doc:id="d10de821-f3cd-4c40-a6ea-6a533725578c" variableName="ID" />
+		<flow-ref doc:name="fetchShirt" doc:id="f618e4a0-3de0-4d0b-b0c5-aee78dc8e4fa" name="fetchShirt" />
+		<db:delete doc:name="deleteShirt" doc:id="7e2fcb16-d6cd-4b10-8706-3a419f1979f4" config-ref="MySQLConnect" >
+			<db:sql ><![CDATA[DELETE FROM shirts
+WHERE ID = :ID]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{'ID': vars.ID}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="deletedMessage" doc:id="5c6a6d74-da37-41dc-adce-301d1af7c244" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: 'Shirt deleted with success!'
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

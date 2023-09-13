@@ -1,0 +1,28 @@
+%dw 2.0
+
+type auto_c5dbfb5f_2921_4155_b1d8_54ec585ab26e_Input_Attributes = {|
+  clientCertificate?: {|
+    publicKey?: {|  |}, 
+    "type"?: String, 
+    encoded?: Binary
+  |}, 
+  headers: {|  |}, 
+  listenerPath: String, 
+  method: String, 
+  queryParams: {|
+    color?: "Red" | "Brown" | "Pink" | "White" | "Blue" | "Purple" | "Yellow" | "Black" | "Orange" | "Green" | "Grey", 
+    size?: "PP" | "P" | "GG" | "G" | "M" | "XG", 
+    printed?: "false" | "true", 
+    sleeve?: "Long" | "Tank Top" | "Short"
+  |}, 
+  queryString: String, 
+  relativePath: String, 
+  remoteAddress: String, 
+  requestPath: String, 
+  requestUri: String, 
+  scheme: String, 
+  uriParams: {|  |}, 
+  version: String, 
+  localAddress: String
+|}
+
